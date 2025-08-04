@@ -118,15 +118,22 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2.5rem 6vw 2.5rem 6vw;
+  padding: 2.5rem 0;
   position: fixed;
-  width: calc(100% - 12vw);
+  width: 100%;
   top: 0;
   left: 0;
   z-index: 10;
   background: rgba(247, 245, 242, 0.85);
   backdrop-filter: blur(6px);
   box-shadow: none;
+}
+
+header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
 }
 
 .logo {
@@ -452,4 +459,121 @@ footer {
 
 .hidden {
   display: none;
+}
+
+/* ======================================
+   반응형 디자인 미디어 쿼리
+====================================== */
+
+/* 컨테이너 클래스 추가 - 반응형 콘텐츠를 위한 공통 클래스 */
+.container {
+  width: 100%;
+  max-width: 1200px; /* 최대 너비 설정 */
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* 태블릿 크기 (768px 이하) */
+@media screen and (max-width: 768px) {
+  header {
+    padding: 1.5rem 4vw;
+    width: calc(100% - 8vw);
+  }
+
+  .logo {
+    font-size: 1.8rem;
+  }
+
+  .hero {
+    padding: 10rem 2rem;
+    margin-top: 5vh;
+  }
+
+  .hero h2 {
+    font-size: 4rem;
+    letter-spacing: -2px;
+  }
+
+  #start-ai-btn,
+  #real-time-words-btn {
+    padding: 0.9rem 2.2rem;
+    font-size: 1rem;
+  }
+
+  .product-grid {
+    gap: 2rem;
+  }
+}
+
+/* 모바일 크기 (480px 이하) */
+@media screen and (max-width: 480px) {
+  header {
+    padding: 1rem 3vw;
+    width: calc(100% - 6vw);
+    flex-wrap: wrap;
+  }
+
+  .logo {
+    font-size: 1.5rem;
+  }
+
+  nav {
+    margin-left: auto;
+  }
+
+  nav a {
+    margin-left: 1rem;
+    font-size: 0.9rem;
+  }
+
+  #auth-section {
+    margin-left: 1rem;
+  }
+
+  #login-text {
+    font-size: 0.9rem;
+  }
+
+  .hero {
+    padding: 8rem 1rem;
+    margin-top: 2vh;
+  }
+
+  .hero h2 {
+    font-size: 2.8rem;
+    letter-spacing: -1px;
+  }
+
+  .hero p {
+    font-size: 1rem;
+  }
+
+  .hero::before {
+    background-size: 30%;
+  }
+
+  #start-ai-btn,
+  #real-time-words-btn {
+    padding: 0.8rem 1.8rem;
+    font-size: 0.9rem;
+    margin: 0.5rem;
+  }
+
+  .products h2 {
+    font-size: 2.2rem;
+  }
+
+  .product-grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  .products {
+    padding: 4rem 1.5rem;
+  }
+
+  footer {
+    padding: 2rem 1rem;
+  }
 }

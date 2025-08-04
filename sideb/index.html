@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
@@ -9,10 +9,28 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
-    <div id="app"></div>
-    <div class="chart-container">
-      <canvas id="word-chart"></canvas>
+    <div class="container">
+      <header class="nf-header">
+        <div class="nf-logo">NONFICTION</div>
+        <div class="nf-question">수많은 기억으로부터 만들어지고 있습니다.</div>
+      </header>
+
+      <div id="app" class="main-content"></div>
+
+      <div class="progress-section">
+        <div id="progress-container" class="progress-container">
+          <!-- Progress bar will be inserted here by JS -->
+        </div>
+      </div>
+
+      <div class="chart-container">
+        <canvas id="word-chart"></canvas>
+      </div>
+
+      <div class="button-container">
+        <!-- Test button will be inserted here by JS -->
+      </div>
     </div>
-    <script type="module" src="/sideb/main.js"></script>
+    <script type="module" src="/sideb/main.constrained.js"></script>
   </body>
 </html>

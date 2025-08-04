@@ -11,7 +11,24 @@ body {
   min-height: 100vh;
   background: #f8f5ef;
   position: relative;
-  overflow: hidden;
+  overflow-x: hidden;
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  min-height: 200px;
+  margin: 80px 0 20px 0;
+  position: relative;
+}
+
+.button-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
 }
 
 /* 상단 로고/텍스트 */
@@ -29,15 +46,23 @@ body {
 }
 .nf-logo {
   font-family: "Noto Serif KR", "Nanum Myeongjo", serif;
-  font-size: 2.1rem;
+  font-size: 1.8rem;
   font-weight: bold;
   letter-spacing: 0.08em;
   color: #222;
 }
 .nf-question {
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   color: #222;
-  margin-top: 0.5em;
+  font-weight: 500;
+  position: absolute;
+  top: 110px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  width: 100%;
+  z-index: 30;
+  letter-spacing: 0.05em;
 }
 
 /* 중앙 향수병 느낌 박스 */
@@ -196,15 +221,15 @@ body {
 
 /* Chart Container */
 .chart-container {
-  position: absolute;
-  bottom: 50px;
-  left: 50px;
-  width: 400px;
+  position: relative;
+  width: 80%;
+  max-width: 400px;
   height: 300px;
   background: rgba(255, 255, 255, 0.8);
   border-radius: 15px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
   padding: 20px;
+  margin: 20px auto;
   z-index: 100;
 }
 
@@ -263,12 +288,22 @@ body {
   transform: rotate(-5deg);
 }
 
+/* Progress Section */
+.progress-section {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin: 20px 0;
+}
+
 /* Progress Bar */
 .progress-container {
-  position: absolute;
-  width: 400px; /* This will be overridden by JS, but good default */
+  position: relative;
+  width: 100%;
+  max-width: 400px;
   text-align: center;
   z-index: 101; /* Ensure it's above the chart */
+  margin-bottom: 20px;
 }
 
 .progress-text {
@@ -311,6 +346,9 @@ body {
   cursor: pointer;
   transition: background-color 0.3s ease, transform 0.1s ease;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  position: relative;
+  display: inline-block;
+  margin: 0 auto;
 }
 
 .test-button:hover {
@@ -321,4 +359,265 @@ body {
 .test-button:active {
   transform: translateY(0);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ======================================
+   반응형 디자인 미디어 쿼리
+====================================== */
+
+/* 컨테이너 클래스 추가 - 반응형 콘텐츠를 위한 공통 클래스 */
+.container {
+  width: 100%;
+  max-width: 1200px; /* 최대 너비 설정 */
+  margin: 0 auto;
+  padding: 0 20px;
+  box-sizing: border-box;
+}
+
+/* 데스크톱 레이아웃 (769px 이상) */
+@media screen and (min-width: 769px) {
+  .main-content {
+    margin-top: 60px;
+    width: 48%; /* 왼쪽에 병 영역 - 크기 증가 */
+    align-items: center; /* 중앙 정렬로 변경 */
+    float: left;
+    min-height: 600px; /* 높이 충분히 확보 */
+  }
+
+  .progress-section {
+    float: right;
+    width: 48%;
+    margin-top: 160px; /* 상단 여백 줄여서 병과 더 가깝게 */
+  }
+
+  .chart-container {
+    float: right;
+    width: 48%;
+    max-width: 550px;
+    margin-top: 30px;
+  }
+
+  .button-container {
+    float: right;
+    width: 50%;
+    justify-content: flex-start;
+    padding-left: 20px;
+  }
+
+  .container {
+    overflow: hidden; /* 플로트 요소 포함 */
+  }
+
+  .nf-question {
+    max-width: 1200px;
+    margin: 0 auto;
+    font-size: 1.4rem;
+  }
+
+  /* 차트와 프로그레스 바 위치 미세 조정 */
+  .chart-container {
+    background-color: #fff;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.08);
+    height: 340px;
+  }
+
+  .progress-container {
+    max-width: 550px;
+    text-align: left;
+    padding-left: 20px;
+  }
+
+  .progress-text {
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+  }
+
+  .test-button {
+    margin-left: 20px;
+  }
+}
+
+/* 태블릿 크기 (768px 이하) */
+@media screen and (max-width: 768px) {
+  .nf-header {
+    padding: 24px 32px 0 32px;
+  }
+
+  .nf-logo {
+    font-size: 1.8rem;
+  }
+
+  .perfume-box {
+    width: 280px;
+    height: 380px;
+    margin: 100px auto 0 auto;
+  }
+
+  .perfume-words {
+    font-size: 1.3rem;
+  }
+
+  .chart-container {
+    max-width: 90%;
+  }
+}
+
+/* 모바일 크기 (480px 이하) */
+@media screen and (max-width: 480px) {
+  .nf-header {
+    padding: 20px 24px 0 24px;
+  }
+
+  .nf-logo {
+    font-size: 1.5rem;
+  }
+
+  .nf-question {
+    font-size: 0.9rem;
+  }
+
+  .perfume-box {
+    width: 240px;
+    height: 320px;
+    margin: 80px auto 0 auto;
+  }
+
+  .perfume-cap {
+    width: 70px;
+    height: 40px;
+    top: -30px;
+  }
+
+  .curve-text {
+    font-size: 0.9rem;
+    margin-top: 24px;
+  }
+
+  .perfume-words {
+    font-size: 1.1rem;
+  }
+
+  .perfume-words span {
+    font-size: 1.1em;
+  }
+
+  .chart-container {
+    width: 90%;
+    height: 250px;
+    padding: 15px;
+    margin: 15px auto;
+  }
+
+  .progress-container {
+    width: 90%;
+    margin: 15px auto;
+  }
+
+  .progress-text {
+    font-size: 0.9rem;
+    margin-bottom: 8px;
+  }
+
+  .progress-bar-outer {
+    height: 6px;
+  }
+
+  .test-button {
+    padding: 12px 24px;
+    font-size: 1rem;
+  }
+
+  .main-content {
+    margin: 60px 0 10px 0;
+  }
+
+  #falling-text-demo {
+    max-height: 300px;
+  }
+
+  /* 단어들을 더 잘 보이게 처리 */
+  .falling-text-container span {
+    opacity: 0.9 !important;
+    font-weight: 600;
+    color: #222 !important;
+    background-color: rgba(255, 255, 255, 0.5);
+    padding: 2px 5px;
+    border-radius: 4px;
+  }
+
+  /* 하이라이트된 단어는 더 강조 */
+  .falling-text-container span.highlighted {
+    opacity: 1 !important;
+    color: #b6a6e6 !important;
+    font-weight: 700;
+  }
+
+  /* 향수병 영역을 확실하게 보이도록 */
+  .basket-area {
+    border-width: 3px;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  }
+}
+
+/* Falling Text 컨테이너 스타일 */
+.falling-text-container {
+  pointer-events: none;
+  position: relative;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+/* 데스크톱에서 Falling Text 컨테이너 추가 스타일 */
+@media screen and (min-width: 769px) {
+  .falling-text-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+
+.falling-text-target {
+  font-size: 2rem;
+  line-height: 1.4;
+  pointer-events: auto;
+  display: none; /* 클릭할 단어들은 숨김 처리 */
+}
+
+.falling-text-canvas {
+  z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* 향수병 스타일 */
+.basket-area {
+  position: absolute;
+  border: 5px solid #e5e2d8;
+  border-radius: 36% 36% 20% 20%/30% 30% 20% 20%;
+  background: rgba(255, 255, 255, 0.7);
+  box-shadow: 0 8px 32px 0 rgba(80, 60, 30, 0.08), 0 1.5px 0 #e6e2d8;
+  z-index: 5;
+  pointer-events: none;
+  overflow: hidden; /* 내부 요소가 바깥으로 벗어나지 않게 함 */
+}
+
+/* 데스크톱에서 향수병 추가 스타일 */
+@media screen and (min-width: 769px) {
+  .basket-area {
+    border-width: 6px;
+    box-shadow: 0 12px 40px rgba(80, 60, 30, 0.12), 0 2px 0 #e6e2d8;
+    background: rgba(255, 255, 255, 0.8);
+  }
+
+  /* 단어들도 데스크톱에서 더 크고 선명하게 */
+  .falling-text-container span {
+    font-size: 1.6rem !important;
+    opacity: 0.95 !important;
+  }
 }

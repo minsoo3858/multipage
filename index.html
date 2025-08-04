@@ -23,77 +23,85 @@
 
     <div id="dynamic-bg"></div>
     <header>
-      <h1 class="logo" id="main-logo" style="cursor: pointer">NONFICTION</h1>
-      <nav>
-        <a href="/sidea">Side A</a>
-        <a href="/sideb">Side B</a>
-      </nav>
-      <div id="auth-section" style="margin-left: auto">
-        <span
-          id="login-text"
-          style="cursor: pointer; font-weight: 600; font-size: 1.1rem"
-          >Login</span
-        >
+      <div class="container">
+        <h1 class="logo" id="main-logo" style="cursor: pointer">NONFICTION</h1>
+        <nav>
+          <a href="/sidea">Side A</a>
+          <a href="/sideb">Side B</a>
+        </nav>
+        <div id="auth-section" style="margin-left: auto">
+          <span
+            id="login-text"
+            style="cursor: pointer; font-weight: 600; font-size: 1.1rem"
+            >Login</span
+          >
+        </div>
       </div>
     </header>
 
     <main>
       <section class="hero">
-        <h2
-          style="
-            font-family: 'Noto Serif KR', serif;
-            font-size: 3.2rem;
-            font-weight: 700;
-            margin-bottom: 1.2rem;
-          "
-        >
-          From Words To You
-        </h2>
-        <p
-          style="
-            font-family: 'Noto Sans KR', sans-serif;
-            font-size: 1.3rem;
-            color: #6b6257;
-            margin-bottom: 2.5rem;
-          "
-        >
-          당신의 향기를 찾아드립니다, 논픽션을 경험해보세요.
-        </p>
-        <div
-          style="display: flex; justify-content: center; align-items: center"
-        >
-          <a href="/sidea/index.html"
-            ><button id="start-ai-btn">start</button></a
+        <div class="container">
+          <h2
+            style="
+              font-family: 'Noto Serif KR', serif;
+              font-size: 3.2rem;
+              font-weight: 700;
+              margin-bottom: 1.2rem;
+            "
           >
-          <a href="/sideb/index.html"
-            ><button id="real-time-words-btn" style="margin-left: 10px">
-              실시간 단어 보기
-            </button></a
+            From Words To You
+          </h2>
+          <p
+            style="
+              font-family: 'Noto Sans KR', sans-serif;
+              font-size: 1.3rem;
+              color: #6b6257;
+              margin-bottom: 2.5rem;
+            "
           >
+            당신의 향기를 찾아드립니다, 논픽션을 경험해보세요.
+          </p>
+          <div
+            style="display: flex; justify-content: center; align-items: center"
+          >
+            <a href="/sidea/index.html"
+              ><button id="start-ai-btn">start</button></a
+            >
+            <a href="/sideb/index.html"
+              ><button id="real-time-words-btn" style="margin-left: 10px">
+                실시간 단어 보기
+              </button></a
+            >
+          </div>
         </div>
       </section>
 
       <section id="ai-recommender" class="hidden">
-        <h3>AI Scent Recommender</h3>
-        <div id="quiz-container">
-          <p class="question">당신을 가장 잘 설명하는 단어는 무엇인가요?</p>
-          <div class="options">
-            <button class="option" data-value="calm">차분함</button>
-            <button class="option" data-value="fresh">상쾌함</button>
-            <button class="option" data-value="energetic">활기참</button>
-            <button class="option" data-value="romantic">로맨틱함</button>
+        <div class="container">
+          <h3>AI Scent Recommender</h3>
+          <div id="quiz-container">
+            <p class="question">당신을 가장 잘 설명하는 단어는 무엇인가요?</p>
+            <div class="options">
+              <button class="option" data-value="calm">차분함</button>
+              <button class="option" data-value="fresh">상쾌함</button>
+              <button class="option" data-value="energetic">활기참</button>
+              <button class="option" data-value="romantic">로맨틱함</button>
+            </div>
           </div>
-        </div>
-        <div id="result-container" class="hidden">
-          <h4>당신을 위한 추천</h4>
-          <p id="result-scent"></p>
-          <p id="result-description"></p>
+          <div id="result-container" class="hidden">
+            <h4>당신을 위한 추천</h4>
+            <p id="result-scent"></p>
+            <p id="result-description"></p>
+          </div>
         </div>
       </section>
     </main>
 
     <footer>
-      <p>&copy; 2024 NONFICTION. All rights reserved.</p>
+      <div class="container">
+        <p>&copy; 2024 NONFICTION. All rights reserved.</p>
+      </div>
     </footer>
 
     <script type="module" src="/main.js"></script>

@@ -46,25 +46,20 @@ class FallingText {
           this.fontSize
         }; line-height: 1.4; pointer-events: auto;"></div>
         <div class="falling-text-canvas" style="z-index:1;"></div>
-        ${
-          this.basketArea
-            ? `<div class="basket-area" style="
-          position: absolute;
-          left: ${this.basketArea.x}px;
-          top: ${this.basketArea.y}px;
-          width: ${this.basketArea.width}px;
-          height: ${this.basketArea.height}px;
-          border: 5px solid #e5e2d8;
-          border-radius: 36% 36% 20% 20%/30% 30% 20% 20%;
-          background: rgba(255,255,255,0.7);
-          box-shadow: 0 8px 32px 0 rgba(80,60,30,0.08), 0 1.5px 0 #e6e2d8;
-          z-index: 5;
-          pointer-events: none;
-        "></div>`
-            : ""
-        }
+        ${this.basketArea ? `<div class="basket-area"></div>` : ""}
       </div>
     `;
+
+    // 향수병 스타일 별도 적용
+    if (this.basketArea) {
+      const basketEl = this.container.querySelector(".basket-area");
+      if (basketEl) {
+        basketEl.style.left = `${this.basketArea.x}px`;
+        basketEl.style.top = `${this.basketArea.y}px`;
+        basketEl.style.width = `${this.basketArea.width}px`;
+        basketEl.style.height = `${this.basketArea.height}px`;
+      }
+    }
     this.containerEl = this.container.querySelector(".falling-text-container");
     this.textEl = this.container.querySelector(".falling-text-target");
     this.canvasEl = this.container.querySelector(".falling-text-canvas");
@@ -172,25 +167,41 @@ class FallingText {
     placeholder.textContent = wordEl.textContent;
     wordEl.parentNode.insertBefore(placeholder, wordEl);
 
-    const x = parseFloat(wordEl.dataset.originalX);
-    const y = parseFloat(wordEl.dataset.originalY);
+    // 단어 요소의 크기
     const width = parseFloat(wordEl.dataset.originalWidth);
     const height = parseFloat(wordEl.dataset.originalHeight);
 
+    // 향수병 영역 내에서 랜덤한 위치 설정
+    let x, y;
+    if (this.basketArea) {
+      // 병 내부 안쪽으로 조금 여유를 두고 배치
+      const margin = Math.max(width, height) / 2;
+      x =
+        this.basketArea.x +
+        margin +
+        Math.random() * (this.basketArea.width - margin * 2);
+      y =
+        this.basketArea.y +
+        margin +
+        Math.random() * (this.basketArea.height * 0.3);
+    } else {
+      x = parseFloat(wordEl.dataset.originalX);
+      y = parseFloat(wordEl.dataset.originalY);
+    }
+
     const body = Matter.Bodies.rectangle(x, y, width, height, {
       render: { fillStyle: "transparent" },
-      restitution: 0.8,
-      frictionAir: 0.01,
-      friction: 0.2,
+      restitution: 0.5, // 튕김 효과 감소
+      frictionAir: 0.02, // 공기 마찰 증가
+      friction: 0.1, // 마찰 감소
     });
 
+    // 초기 속도 설정
     let initialVelocity;
     if (this.basketArea) {
-      const basketCenterX = this.basketArea.x + this.basketArea.width / 2;
-      const directionToBasket = basketCenterX - x;
       initialVelocity = {
-        x: directionToBasket * 0.002 + (Math.random() - 0.5) * 2,
-        y: 0,
+        x: (Math.random() - 0.5) * 1, // 좌우 움직임 감소
+        y: Math.random() * 0.5, // 천천히 떨어지도록
       };
     } else {
       initialVelocity = {
@@ -251,28 +262,45 @@ class FallingText {
       const basketRight = this.basketArea.x + this.basketArea.width;
       const basketBottom = this.basketArea.y + this.basketArea.height;
 
+      // 향수병 내부에 벽 생성 - 경계를 병 안쪽으로 조금 더 넣어서 단어가 튀어나오지 않게 함
       const basketFloor = Bodies.rectangle(
         basketLeft + this.basketArea.width / 2,
-        basketBottom + 25,
-        this.basketArea.width,
-        50,
+        basketBottom - 10,
+        this.basketArea.width - 30,
+        10,
         boundaryOptions
       );
+
       const basketLeftWall = Bodies.rectangle(
-        basketLeft - 25,
+        basketLeft + 15,
         basketTop + this.basketArea.height / 2,
-        50,
-        this.basketArea.height,
+        10,
+        this.basketArea.height - 30,
         boundaryOptions
       );
+
       const basketRightWall = Bodies.rectangle(
-        basketRight + 25,
+        basketRight - 15,
         basketTop + this.basketArea.height / 2,
-        50,
-        this.basketArea.height,
+        10,
+        this.basketArea.height - 30,
         boundaryOptions
       );
-      boundaries = [basketFloor, basketLeftWall, basketRightWall];
+
+      const basketCeiling = Bodies.rectangle(
+        basketLeft + this.basketArea.width / 2,
+        basketTop + 15,
+        this.basketArea.width - 30,
+        10,
+        boundaryOptions
+      );
+
+      boundaries = [
+        basketFloor,
+        basketLeftWall,
+        basketRightWall,
+        basketCeiling,
+      ];
     } else {
       const floor = Bodies.rectangle(
         width / 2,
@@ -326,10 +354,57 @@ class FallingText {
     const updateLoop = () => {
       this.wordBodies.forEach(({ body, elem }) => {
         const { x, y } = body.position;
-        elem.style.left = `${x}px`;
-        elem.style.top = `${y}px`;
+        const elemWidth = elem.offsetWidth;
+        const elemHeight = elem.offsetHeight;
+
+        // 향수병 경계 내에 유지하기
+        if (this.basketArea) {
+          const basketLeft = this.basketArea.x + elemWidth / 2;
+          const basketRight =
+            this.basketArea.x + this.basketArea.width - elemWidth / 2;
+          const basketTop = this.basketArea.y + elemHeight / 2;
+          const basketBottom =
+            this.basketArea.y + this.basketArea.height - elemHeight / 2;
+
+          let positionChanged = false;
+          let newPosition = { x, y };
+          let newVelocity = { x: body.velocity.x, y: body.velocity.y };
+
+          // 좌우 경계 확인 및 반동 적용
+          if (x < basketLeft) {
+            newPosition.x = basketLeft;
+            newVelocity.x = Math.abs(body.velocity.x) * 0.5; // 반대 방향으로 튕기되 속도 감소
+            positionChanged = true;
+          } else if (x > basketRight) {
+            newPosition.x = basketRight;
+            newVelocity.x = -Math.abs(body.velocity.x) * 0.5;
+            positionChanged = true;
+          }
+
+          // 상하 경계 확인 및 반동 적용
+          if (y < basketTop) {
+            newPosition.y = basketTop;
+            newVelocity.y = Math.abs(body.velocity.y) * 0.5;
+            positionChanged = true;
+          } else if (y > basketBottom) {
+            newPosition.y = basketBottom;
+            newVelocity.y = -Math.abs(body.velocity.y) * 0.5;
+            positionChanged = true;
+          }
+
+          // 위치나 속도가 변경되었다면 물리 엔진에 적용
+          if (positionChanged) {
+            Matter.Body.setPosition(body, newPosition);
+            Matter.Body.setVelocity(body, newVelocity);
+          }
+        }
+
+        // 위치 업데이트
+        elem.style.left = `${body.position.x}px`;
+        elem.style.top = `${body.position.y}px`;
         elem.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`;
       });
+
       Matter.Engine.update(this.engine);
       this.animationId = requestAnimationFrame(updateLoop);
     };
@@ -337,13 +412,148 @@ class FallingText {
   }
 }
 
-// 중앙 박스 크기 지정
+// 중앙 박스 크기 지정 - 반응형으로 계산
+function calculateResponsiveBoxSize() {
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
 
-const boxWidth = 700;
-const boxHeight = 360;
-// 고정 위치로 설정 (예: 좌측 400, 상단 200)
-const boxX = 650;
-const boxY = 200;
+  // 화면 크기에 따라 박스 크기 조절
+  let boxWidth, boxHeight, boxX, boxY;
+
+  if (screenWidth < 480) {
+    // 모바일
+    boxWidth = Math.min(300, screenWidth * 0.85);
+    boxHeight = boxWidth * 0.52;
+    boxX = (screenWidth - boxWidth) / 2;
+    boxY = 120;
+  } else if (screenWidth < 768) {
+    // 태블릿
+    boxWidth = Math.min(500, screenWidth * 0.7);
+    boxHeight = boxWidth * 0.52;
+    boxX = (screenWidth - boxWidth) / 2;
+    boxY = 150;
+  } else {
+    // 데스크톱
+    boxWidth = Math.min(700, screenWidth * 0.6);
+    boxHeight = boxWidth * 0.52;
+    boxX = (screenWidth - boxWidth) / 2;
+    boxY = 200;
+  }
+
+  return { boxWidth, boxHeight, boxX, boxY };
+}
+
+// 반응형 크기 및 위치 계산
+const { boxWidth, boxHeight, boxX, boxY } = calculateResponsiveBoxSize();
+
+// FallingText 초기화 함수
+function initFallingText(boxSize) {
+  const { boxX, boxY, boxWidth, boxHeight } =
+    boxSize || calculateResponsiveBoxSize();
+  const demoDiv = document.querySelector("#falling-text-demo");
+
+  // 기존에 있던 falling-text 요소를 제거하고 재생성
+  if (demoDiv) {
+    demoDiv.innerHTML = "";
+
+    // 디바이스 크기에 따라 글자 크기 조정
+    const screenWidth = window.innerWidth;
+    let fontSize = "1.8rem";
+    let gravity = 0.3;
+
+    if (screenWidth < 480) {
+      fontSize = "1.2rem"; // 모바일
+      gravity = 0.2;
+    } else if (screenWidth < 768) {
+      fontSize = "1.5rem"; // 태블릿
+      gravity = 0.25;
+    }
+
+    // 떨어지는 단어 개수 조정 (모바일에서는 더 적게)
+    const words =
+      screenWidth < 480
+        ? "고요함 섬세함 자유로움 대화 진심 온기"
+        : "고요함 섬세함 자유로움 새로운 경험 감정 조용한 시간 대화 솔직함 햇살 진심 온기 Gentle Night For rest Forget Me Not Santal Cream";
+
+    // 향수병 영역 계산 (모바일에서도 잘 보이게)
+    const demoRect = demoDiv.getBoundingClientRect();
+    const bottleSize = Math.min(
+      demoRect.width * 0.8,
+      demoRect.height * 0.8,
+      boxWidth
+    );
+    const bottleX = (demoRect.width - bottleSize) / 2; // 중앙 정렬
+    const bottleY = (demoRect.height - bottleSize * 1.2) / 2; // 중앙 정렬
+
+    // FallingText 생성
+    const fallingTextInstance = new FallingText({
+      container: demoDiv,
+      text: words,
+      highlightWords: [
+        "고요함",
+        "자유로움",
+        "온기",
+        "GentleNight",
+        "SantalCream",
+      ],
+      highlightClass: "highlighted",
+      trigger: "auto",
+      backgroundColor: "transparent",
+      wireframes: false,
+      gravity: gravity,
+      fontSize: fontSize,
+      mouseConstraintStiffness: 0.5,
+      basketArea: {
+        x: bottleX,
+        y: bottleY,
+        width: bottleSize,
+        height: bottleSize * 1.2,
+      },
+    });
+
+    console.log("향수병 영역 설정:", {
+      x: bottleX,
+      y: bottleY,
+      width: bottleSize,
+      height: bottleSize * 1.2,
+    });
+  }
+}
+
+// 윈도우 크기 변경 시 요소 위치 재계산
+window.addEventListener("resize", () => {
+  // 일정 간격으로 debounce 된 resize 이벤트만 처리
+  clearTimeout(window.resizeTimer);
+  window.resizeTimer = setTimeout(() => {
+    console.log("화면 크기 변경, 컴포넌트 재초기화...");
+
+    // FallingText 데모 컨테이너 높이 조정
+    const screenWidth = window.innerWidth;
+    const demoDiv = document.querySelector("#falling-text-demo");
+
+    if (demoDiv) {
+      if (screenWidth < 480) {
+        demoDiv.style.height = "300px"; // 모바일
+      } else if (screenWidth < 768) {
+        demoDiv.style.height = "350px"; // 태블릿
+      } else {
+        demoDiv.style.height = "400px"; // 데스크탑
+      }
+    }
+
+    const newValues = calculateResponsiveBoxSize();
+
+    // 향수병 위치 업데이트
+    updateBottlePosition(newValues);
+
+    // 도넛 차트와 프로그레스 바 위치 조정
+    adjustChartAndProgressPosition();
+
+    // FallingText 전체 재초기화
+    console.log("FallingText 재초기화 중...");
+    initFallingText(newValues);
+  }, 350); // 더 긴 디바운스 시간으로 성능 향상
+});
 
 // 배경색 변경
 
@@ -570,28 +780,12 @@ document.body.appendChild(uiBar);
 
 // FallingText 데모 복구
 document.querySelector("#app").innerHTML = `
-  <div id="falling-text-demo" style="width: 100vw; height: 100vh;"></div>
+  <div class="falling-text-container">
+    <div id="falling-text-demo" style="width: 100%; height: 400px; max-height: 60vh; position: relative; margin-bottom: 20px;"></div>
+  </div>
 `;
 
-// 한글 단어 FallingText 인스턴스 생성
-new FallingText({
-  container: document.querySelector("#falling-text-demo"),
-  text: "고요함 섬세함 자유로움 새로운 경험 감정 조용한 시간 대화 솔직함 햇살 진심 온기 Gentle Night For rest Forget Me Not Santal Cream",
-  highlightWords: ["고요함", "자유로움", "온기", "GentleNight", "SantalCream"],
-  highlightClass: "highlighted",
-  trigger: "auto",
-  backgroundColor: "transparent",
-  wireframes: false,
-  gravity: 0.56,
-  fontSize: "2rem",
-  mouseConstraintStiffness: 0.9,
-  basketArea: {
-    x: boxX,
-    y: boxY,
-    width: boxWidth,
-    height: boxHeight,
-  },
-});
+// FallingText는 이제 initFallingText 함수에서 생성
 
 // 향수병 테두리 위에 아치형 곡선 문구 추가
 setTimeout(() => {
@@ -668,8 +862,8 @@ setTimeout(createAndPlaceBrandIcons, 300);
 
 // --- Progress Bar ---
 function createProgressBar() {
-  const progressContainer = document.createElement("div");
-  progressContainer.className = "progress-container";
+  const progressContainer = document.getElementById("progress-container");
+  if (!progressContainer) return;
 
   const progressText = document.createElement("div");
   progressText.className = "progress-text";
@@ -685,20 +879,6 @@ function createProgressBar() {
   progressContainer.appendChild(progressText);
   progressContainer.appendChild(progressBarOuter);
 
-  document.body.appendChild(progressContainer);
-
-  // Calculate position relative to the chart container
-  const chartContainer = document.querySelector(".chart-container");
-  if (chartContainer) {
-    const chartRect = chartContainer.getBoundingClientRect();
-    progressContainer.style.position = "absolute";
-    progressContainer.style.left = `${chartRect.left}px`;
-    progressContainer.style.top = `${
-      chartRect.top - progressContainer.offsetHeight - 20
-    }px`; // 20px above the chart
-    progressContainer.style.width = `${chartRect.width}px`;
-  }
-
   // Trigger the animation after a short delay
   setTimeout(() => {
     progressBarInner.style.width = "87%";
@@ -711,14 +891,12 @@ function createTestButton() {
   testButton.textContent = "테스트 하러 가기";
   testButton.className = "test-button";
 
-  document.body.appendChild(testButton);
-
-  // Position the button relative to the basketArea
-  testButton.style.position = "absolute";
-  testButton.style.left = `${boxX + boxWidth / 2}px`;
-  testButton.style.top = `${boxY + boxHeight + 50}px`; // 50px below the basket
-  testButton.style.transform = "translateX(-50%)";
-  testButton.style.zIndex = "100";
+  const buttonContainer = document.querySelector(".button-container");
+  if (buttonContainer) {
+    buttonContainer.appendChild(testButton);
+  } else {
+    document.body.appendChild(testButton);
+  }
 
   testButton.addEventListener("click", () => {
     window.location.href = "../sidea/index.html";
@@ -790,13 +968,124 @@ function createDonutChart() {
   });
 }
 
-// 3. DOM이 로드된 후 차트 생성
+// 향수병 위치 업데이트 함수
+function updateBottlePosition(values) {
+  const { boxX, boxY, boxWidth, boxHeight } =
+    values || calculateResponsiveBoxSize();
+
+  // 향수병 요소 찾기
+  const basketEl = document.querySelector(".basket-area");
+  if (basketEl) {
+    // 데모 컨테이너의 크기를 기준으로 계산
+    const demoDiv = document.querySelector("#falling-text-demo");
+    if (!demoDiv) return;
+
+    const demoRect = demoDiv.getBoundingClientRect();
+    const demoWidth = demoRect.width;
+    const demoHeight = demoRect.height;
+
+    // 모바일에서도 보이도록 조정된 크기와 위치
+    const bottleSize = Math.min(demoWidth * 0.8, demoHeight * 0.8, boxWidth);
+    const left = (demoWidth - bottleSize) / 2; // 중앙 정렬
+    const top = (demoHeight - bottleSize * 1.2) / 2; // 중앙 정렬, 높이는 1.2배로 해서 병 형태 유지
+
+    basketEl.style.left = `${left}px`;
+    basketEl.style.top = `${top}px`;
+    basketEl.style.width = `${bottleSize}px`;
+    basketEl.style.height = `${bottleSize * 1.2}px`;
+
+    console.log("향수병 위치 업데이트:", {
+      left,
+      top,
+      width: bottleSize,
+      height: bottleSize * 1.2,
+    });
+
+    console.log("Bottle updated:", {
+      bottleSize,
+      demoWidth,
+      demoHeight,
+      left,
+      top,
+    });
+  }
+
+  // 아치형 곡선 문구 위치 업데이트
+  const archEl = document.querySelector("svg");
+  if (archEl) {
+    const demoDiv = document.querySelector("#falling-text-demo");
+    const demoWidth = demoDiv.offsetWidth;
+    const basketEl = document.querySelector(".basket-area");
+
+    if (basketEl) {
+      const basketTop = parseInt(basketEl.style.top, 10);
+      const archWidth = Math.min(boxWidth + 40, demoWidth * 0.9);
+
+      archEl.setAttribute("width", archWidth);
+      archEl.style.left = `${(demoWidth - archWidth) / 2}px`;
+      archEl.style.top = `${basketTop - 70}px`;
+
+      // SVG 내부 패스도 업데이트
+      const archPath = archEl.querySelector("#arch-path");
+      if (archPath) {
+        archPath.setAttribute(
+          "d",
+          `M 20 70 Q ${archWidth / 2} 0 ${archWidth - 20} 70`
+        );
+      }
+    }
+  }
+}
+
+// 도넛 차트 및 프로그레스 바 위치 조정
+function adjustChartAndProgressPosition() {
+  // 반응형 레이아웃으로 변경했으므로 추가 조정은 필요 없음
+  // CSS에서 미디어 쿼리로 처리함
+}
+
+// 페이지 초기화 함수
+function initPage() {
+  const demoDiv = document.querySelector("#falling-text-demo");
+  const contentContainer = document.querySelector(".main-content");
+
+  // Responsive box size calculation
+  const boxSize = calculateResponsiveBoxSize();
+
+  demoDiv.style.width = "100%";
+  demoDiv.style.height = "400px";
+  demoDiv.style.maxHeight = "60vh";
+  demoDiv.style.position = "relative";
+
+  // Create the chart, progress bar, test button, and falling text
+  createDonutChart(boxSize);
+  createProgressBar();
+  createTestButton();
+  initFallingText(boxSize);
+
+  // Adjust positions once everything is created
+  updateBottlePosition(boxSize);
+  adjustChartAndProgressPosition();
+
+  // Ensure we see these components
+  console.log("Initialized page components:");
+  console.log(
+    "- Demo div dimensions:",
+    demoDiv.offsetWidth,
+    demoDiv.offsetHeight
+  );
+  console.log("- Box size:", boxSize);
+
+  // Force redraw after a short delay to ensure all elements are positioned correctly
+  setTimeout(() => {
+    window.dispatchEvent(new Event("resize"));
+  }, 100);
+}
+
+// 3. DOM이 로드된 후 초기화
 document.addEventListener(
   "DOMContentLoaded",
   () => {
-    createDonutChart();
-    createProgressBar();
-    createTestButton(); // Call createTestButton after createProgressBar
+    initPage();
   },
   500
-); // 약간의 지연 후 차트 생성;
+); // 약간의 지연 후 초기화
