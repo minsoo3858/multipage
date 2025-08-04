@@ -825,7 +825,9 @@ function addResultButtons(container) {
   wordsBtn.onmouseleave = () => {
     wordsBtn.style.background = "rgba(255,255,255,0.13)";
   };
-  // TODO: 모두의 단어 보기 링크 연결 필요
+  wordsBtn.addEventListener("click", () => {
+    window.location.href = "../sideb/index.html";
+  });
   btnWrap.appendChild(wordsBtn);
 
   container.appendChild(btnWrap);
