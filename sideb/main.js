@@ -721,8 +721,7 @@ function createTestButton() {
   testButton.style.zIndex = "100";
 
   testButton.addEventListener("click", () => {
-    alert("테스트 페이지로 이동합니다!"); // Replace with actual navigation
-    // window.location.href = '/test-page';
+    window.location.href = "../sidea/index.html";
   });
 }
 
