@@ -1,0 +1,324 @@
+/* 전체 배경 및 폰트 */
+:root {
+  font-family: "Noto Serif KR", "Nanum Myeongjo", serif;
+  color: #222;
+  background: #f8f5ef;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #f8f5ef;
+  position: relative;
+  overflow: hidden;
+}
+
+/* 상단 로고/텍스트 */
+.nf-header {
+  width: 100vw;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 36px 48px 0 48px;
+  box-sizing: border-box;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 10;
+}
+.nf-logo {
+  font-family: "Noto Serif KR", "Nanum Myeongjo", serif;
+  font-size: 2.1rem;
+  font-weight: bold;
+  letter-spacing: 0.08em;
+  color: #222;
+}
+.nf-question {
+  font-size: 1.1rem;
+  color: #222;
+  margin-top: 0.5em;
+}
+
+/* 중앙 향수병 느낌 박스 */
+.perfume-box {
+  width: 340px;
+  height: 440px;
+  margin: 120px auto 0 auto;
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 36% 36% 20% 20%/30% 30% 20% 20%;
+  border: 2.5px solid #d2cfc7;
+  box-shadow: 0 8px 32px 0 rgba(80, 60, 30, 0.08), 0 1.5px 0 #e6e2d8;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  overflow: visible;
+}
+.perfume-cap {
+  width: 90px;
+  height: 48px;
+  background: linear-gradient(180deg, #e5e2d8 60%, #bdb7a7 100%);
+  border-radius: 40px 40px 18px 18px/60px 60px 18px 18px;
+  position: absolute;
+  top: -38px;
+  left: 50%;
+  transform: translateX(-50%);
+  box-shadow: 0 2px 8px 0 #bdb7a733;
+  border: 1.5px solid #d2cfc7;
+}
+
+/* 곡선 텍스트 (SVG로 구현 권장, 임시로 중앙 정렬) */
+.curve-text {
+  width: 100%;
+  text-align: center;
+  font-size: 1.15rem;
+  color: #222;
+  margin-top: 32px;
+  margin-bottom: 0;
+  letter-spacing: 0.02em;
+  font-family: "Noto Serif KR", serif;
+}
+
+/* 향수병 안 단어 */
+.perfume-words {
+  width: 100%;
+  height: 80%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2em;
+  font-size: 1.5rem;
+  font-family: "Noto Serif KR", serif;
+  font-weight: 600;
+}
+.perfume-words span {
+  display: inline-block;
+  margin: 0.1em 0.2em;
+  font-size: 1.2em;
+  opacity: 0.95;
+}
+.perfume-words .yellow {
+  color: #e6c86b;
+}
+.perfume-words .purple {
+  color: #b6a6e6;
+}
+.perfume-words .pink {
+  color: #e6a6c7;
+}
+.perfume-words .orange {
+  color: #e6b68a;
+}
+.perfume-words .blue {
+  color: #6b8be6;
+}
+.perfume-words .gray {
+  color: #bdb7a7;
+}
+
+/* 버튼 */
+.nf-btn {
+  margin: 32px auto 0 auto;
+  display: block;
+  padding: 0.9em 2.2em;
+  border-radius: 12px;
+  border: 1.5px solid #bdb7a7;
+  background: #f8f5ef;
+  color: #222;
+  font-size: 1.1rem;
+  font-family: "Noto Serif KR", serif;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+}
+.nf-btn:hover {
+  background: #e6e2d8;
+  color: #7a6c4d;
+}
+
+/* 하단 텍스트 */
+.nf-bottom {
+  margin: 36px auto 0 auto;
+  text-align: center;
+  color: #222;
+  font-size: 1.08rem;
+  font-family: "Noto Serif KR", serif;
+}
+.nf-bottom strong {
+  font-weight: bold;
+  color: #b6a6e6;
+}
+
+/* NONFICTION 하단 로고 */
+.nf-footer {
+  margin: 32px auto 0 auto;
+  text-align: center;
+  font-family: "Noto Serif KR", "Nanum Myeongjo", serif;
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #222;
+  letter-spacing: 0.08em;
+}
+
+/* 입자 효과 (간단한 CSS 애니메이션) */
+.nf-particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+}
+.nf-particle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.18;
+  animation: float 6s infinite linear;
+}
+@keyframes float {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 0.18;
+  }
+  50% {
+    opacity: 0.32;
+  }
+  100% {
+    transform: translateY(-60px) scale(1.2);
+    opacity: 0.18;
+  }
+}
+
+/* Chart Container */
+.chart-container {
+  position: absolute;
+  bottom: 50px;
+  left: 50px;
+  width: 400px;
+  height: 300px;
+  background: rgba(255, 255, 255, 0.8);
+  border-radius: 15px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  padding: 20px;
+  z-index: 100;
+}
+
+/* User's Choice Word Highlight */
+.user-choice {
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Brand Icons */
+.brand-icon {
+  position: absolute;
+  width: 60px;
+  height: 60px;
+  opacity: 0.3;
+  transition: all 0.3s ease-in-out;
+  z-index: 10;
+}
+
+.brand-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.brand-icon svg path {
+  stroke: #7a6c4d;
+  stroke-width: 4;
+}
+
+.brand-icon:hover {
+  opacity: 0.8;
+  transform: scale(1.1);
+}
+
+.brand-icon--snake {
+  transform: rotate(-15deg);
+}
+.brand-icon--leaf {
+  transform: rotate(20deg);
+}
+.brand-icon--book {
+  transform: rotate(-5deg);
+}
+
+/* Progress Bar */
+.progress-container {
+  position: absolute;
+  width: 400px; /* This will be overridden by JS, but good default */
+  text-align: center;
+  z-index: 101; /* Ensure it's above the chart */
+}
+
+.progress-text {
+  font-size: 1.1rem;
+  color: #7a6c4d;
+  margin-bottom: 12px;
+  font-family: "Noto Serif KR", serif;
+}
+
+.progress-text strong {
+  font-weight: bold;
+  color: #b6a6e6;
+}
+
+.progress-bar-outer {
+  width: 100%;
+  height: 8px;
+  background-color: #e6e2d8;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-inner {
+  height: 100%;
+  background-color: #b6a6e6;
+  border-radius: 4px;
+  transition: width 2s cubic-bezier(0.25, 1, 0.5, 1);
+  width: 0; /* Initial width for animation */
+}
+
+/* Test Button */
+.test-button {
+  padding: 15px 30px;
+  background-color: #7a6c4d; /* 논픽션 브랜드 컬러 */
+  color: #f7f5f2;
+  border: none;
+  border-radius: 8px;
+  font-size: 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.1s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.test-button:hover {
+  background-color: #5e533e;
+  transform: translateY(-2px);
+}
+
+.test-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}

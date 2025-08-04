@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NONFICTION - A/B Test Version A</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&family=Noto+Serif+KR:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/src/style.css" />
+    <link rel="stylesheet" href="/ref/style.css" />
+  </head>
+  <body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+      <div class="logo-container">
+        <div class="logo-rotating"></div>
+      </div>
+      <div class="glitch-effect"></div>
+    </div>
+
+    <div id="dynamic-bg"></div>
+    <header>
+      <h1 class="logo">NONFICTION</h1>
+      <nav>
+        <a href="#">Shop</a>
+        <a href="#">About</a>
+        <a href="#">Stores</a>
+      </nav>
+    </header>
+    <div id="auth-section" style="text-align: right; margin: 1rem">
+      <button id="google-login">구글 로그인</button>
+      <button id="google-logout" style="display: none">로그아웃</button>
+      <span id="user-info"></span>
+    </div>
+
+    <main>
+      <section class="hero">
+        <h2
+          style="
+            font-family: 'Noto Serif KR', serif;
+            font-size: 3.2rem;
+            font-weight: 700;
+            margin-bottom: 1.2rem;
+          "
+        >
+          당신의 이야기를 향기로 완성하다
+        </h2>
+        <p
+          style="
+            font-family: 'Noto Sans KR', sans-serif;
+            font-size: 1.3rem;
+            color: #6b6257;
+            margin-bottom: 2.5rem;
+          "
+        >
+          논픽션이 제안하는 향기로운 경험, 지금 시작해보세요.
+        </p>
+        <button id="start-ai-btn">start</button>
+      </section>
+
+      <section id="ai-recommender" class="hidden">
+        <h3>AI Scent Recommender</h3>
+        <div id="quiz-container">
+          <p class="question">당신을 가장 잘 설명하는 단어는 무엇인가요?</p>
+          <div class="options">
+            <button class="option" data-value="calm">차분함</button>
+            <button class="option" data-value="fresh">상쾌함</button>
+            <button class="option" data-value="energetic">활기참</button>
+            <button class="option" data-value="romantic">로맨틱함</button>
+          </div>
+        </div>
+        <div id="result-container" class="hidden">
+          <h4>당신을 위한 추천</h4>
+          <p id="result-scent"></p>
+          <p id="result-description"></p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>&copy; 2024 NONFICTION. All rights reserved.</p>
+    </footer>
+
+    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/ref/script.js"></script>
+  </body>
+</html>
