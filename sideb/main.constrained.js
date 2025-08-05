@@ -110,6 +110,9 @@ const FallingText = (function () {
       const wordEl = document.createElement("span");
       wordEl.textContent = word;
 
+      // 각 단어에 data-word 속성 추가 (CSS에서 색깔 적용용)
+      wordEl.setAttribute("data-word", word);
+
       // 하이라이트 단어인지 확인하여 클래스 추가
       if (this.highlightWords.includes(word)) {
         wordEl.classList.add(this.highlightClass);
@@ -178,6 +181,8 @@ const FallingText = (function () {
   // 단일 단어 드롭 메소드 - 수정됨
   FallingText.prototype.dropSingleWord = function (wordEl) {
     if (wordEl._dropped) return;
+
+    console.log("Dropping word:", wordEl.textContent);
     wordEl._dropped = true;
 
     // 변경된 부분: 단어가 떨어질 영역 내에서 랜덤한 위치 선택
@@ -185,14 +190,20 @@ const FallingText = (function () {
     const dropAreaHeight = this.dropArea.height * 0.3; // 위쪽 30%에서만 생성
 
     // 단어 요소의 너비와 높이
-    const width = wordEl.offsetWidth;
-    const height = wordEl.offsetHeight;
+    const width = wordEl.offsetWidth || 50; // 기본값 설정
+    const height = wordEl.offsetHeight || 20; // 기본값 설정
 
     // 랜덤한 시작 위치 (향수병 내에서) - 단어 크기를 고려해 경계 안쪽에 배치
     const randomX =
-      this.dropArea.x + width / 2 + Math.random() * (dropAreaWidth - width);
+      this.dropArea.x +
+      width / 2 +
+      Math.random() * Math.max(10, dropAreaWidth - width);
     const randomY =
-      this.dropArea.y + height / 2 + Math.random() * (dropAreaHeight - height);
+      this.dropArea.y +
+      height / 2 +
+      Math.random() * Math.max(10, dropAreaHeight - height);
+
+    console.log("Word position:", { randomX, randomY, width, height });
 
     // 위치 요소 생성
     const placeholder = document.createElement("span");
@@ -200,10 +211,18 @@ const FallingText = (function () {
     placeholder.style.height = `${height}px`;
     placeholder.style.display = "inline-block";
     placeholder.style.margin = wordEl.style.margin;
-    wordEl.parentNode.replaceChild(placeholder, wordEl);
+    if (wordEl.parentNode) {
+      wordEl.parentNode.replaceChild(placeholder, wordEl);
+    }
 
     // 컨테이너에 단어 추가
     this.containerEl.appendChild(wordEl);
+
+    // 단어의 data-word 속성 확인 및 유지
+    const wordText = wordEl.getAttribute("data-word") || wordEl.textContent;
+    if (!wordEl.getAttribute("data-word")) {
+      wordEl.setAttribute("data-word", wordText);
+    }
 
     // Matter.js 물리 엔진에 단어 추가
     const body = Matter.Bodies.rectangle(randomX, randomY, width, height, {
@@ -212,40 +231,66 @@ const FallingText = (function () {
         strokeStyle: "transparent",
         lineWidth: 0,
       },
-      restitution: 0.3, // 탄성 추가
-      friction: 0.002, // 마찰 감소
+      restitution: 0.4, // 탄성 증가
+      friction: 0.01, // 마찰 조금 증가
+      frictionAir: 0.01, // 공기 저항 추가
+      density: 0.001, // 밀도 조정
     });
 
     // 초기 속도 설정
     const initialVelocity = {
-      x: (Math.random() - 0.5) * 1, // 좌우 움직임 감소
-      y: Math.random() * 1, // 천천히 떨어지도록
+      x: (Math.random() - 0.5) * 2, // 좌우 움직임 조금 증가
+      y: Math.random() * 0.5, // 아래로 천천히
     };
 
     Matter.Body.setVelocity(body, initialVelocity);
-    Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.03); // 회전 속도 감소
+    Matter.Body.setAngularVelocity(body, (Math.random() - 0.5) * 0.05); // 회전 속도 조금 증가
 
     wordEl.style.position = "absolute";
     wordEl.style.left = `${randomX}px`;
     wordEl.style.top = `${randomY}px`;
     wordEl.style.transform = "translate(-50%, -50%)";
     wordEl.style.zIndex = "10";
+    wordEl.style.pointerEvents = "none"; // 마우스 이벤트 방지
 
     this.wordBodies.push({ elem: wordEl, body, placeholder });
-    Matter.World.add(this.engine.world, [body]);
-    if (!this.animationId) this.startUpdateLoop();
+
+    // 엔진이 준비되어 있는지 확인
+    if (this.engine && this.engine.world) {
+      Matter.World.add(this.engine.world, [body]);
+      console.log("Word added to physics world");
+    } else {
+      console.error("Physics engine not ready");
+    }
+
+    if (!this.animationId) {
+      console.log("Starting animation loop");
+      this.startUpdateLoop();
+    }
   };
 
   // 물리 엔진 초기화 메소드
   FallingText.prototype.initPhysicsEngine = function () {
+    console.log("Initializing physics engine...");
+
     const { Engine, Render, World, Bodies, Runner, Mouse, MouseConstraint } =
       Matter;
     const containerRect = this.containerEl.getBoundingClientRect();
     const width = containerRect.width;
     const height = containerRect.height;
 
+    console.log("Container dimensions:", { width, height });
+
+    // 기존 엔진이 있다면 정리
+    if (this.engine) {
+      if (this.runner) Runner.stop(this.runner);
+      if (this.render) Render.stop(this.render);
+      Engine.clear(this.engine);
+    }
+
     this.engine = Engine.create();
     this.engine.world.gravity.y = this.gravity;
+    console.log("Engine created with gravity:", this.gravity);
 
     this.render = Render.create({
       element: this.canvasEl,
@@ -255,12 +300,17 @@ const FallingText = (function () {
         height,
         background: this.backgroundColor,
         wireframes: this.wireframes,
+        showAngleIndicator: false,
+        showVelocity: false,
       },
     });
 
     if (this.render.canvas) {
       this.render.canvas.style.pointerEvents = "none";
       this.render.canvas.style.zIndex = "-1";
+      this.render.canvas.style.position = "absolute";
+      this.render.canvas.style.top = "0";
+      this.render.canvas.style.left = "0";
     }
 
     const boundaryOptions = {
@@ -272,6 +322,8 @@ const FallingText = (function () {
     let boundaries = [];
 
     if (this.basketArea) {
+      console.log("Creating basket boundaries for area:", this.basketArea);
+
       const basketLeft = this.basketArea.x;
       const basketTop = this.basketArea.y;
       const basketRight = this.basketArea.x + this.basketArea.width;
@@ -282,14 +334,14 @@ const FallingText = (function () {
         basketLeft + this.basketArea.width / 2,
         basketBottom - 10,
         this.basketArea.width - 30,
-        10,
+        20,
         boundaryOptions
       );
 
       const basketLeftWall = Bodies.rectangle(
         basketLeft + 15,
         basketTop + this.basketArea.height / 2,
-        10,
+        20,
         this.basketArea.height - 30,
         boundaryOptions
       );
@@ -297,7 +349,7 @@ const FallingText = (function () {
       const basketRightWall = Bodies.rectangle(
         basketRight - 15,
         basketTop + this.basketArea.height / 2,
-        10,
+        20,
         this.basketArea.height - 30,
         boundaryOptions
       );
@@ -306,7 +358,7 @@ const FallingText = (function () {
         basketLeft + this.basketArea.width / 2,
         basketTop + 15,
         this.basketArea.width - 30,
-        10,
+        20,
         boundaryOptions
       );
 
@@ -364,15 +416,35 @@ const FallingText = (function () {
     this.render.mouse = mouse;
 
     World.add(this.engine.world, [...boundaries, mouseConstraint]);
+
     this.runner = Runner.create();
     Runner.run(this.runner, this.engine);
     Render.run(this.render);
+
+    console.log("Physics engine initialized successfully");
   };
 
   // 업데이트 루프 시작
   FallingText.prototype.startUpdateLoop = function () {
+    // 이미 애니메이션이 실행 중이면 중단
+    if (this.animationId) {
+      cancelAnimationFrame(this.animationId);
+      this.animationId = null;
+    }
+
     const updateLoop = () => {
+      // 엔진이 없거나 중단된 경우 애니메이션 중지
+      if (!this.engine || !this.engine.world) {
+        console.log("Engine not available, stopping animation loop");
+        return;
+      }
+
+      // Matter.js 엔진 업데이트를 먼저 실행
+      Matter.Engine.update(this.engine, 16.666); // 60fps
+
       this.wordBodies.forEach(({ body, elem }) => {
+        if (!body || !elem) return;
+
         const { x, y } = body.position;
         const elemWidth = elem.offsetWidth;
         const elemHeight = elem.offsetHeight;
@@ -419,15 +491,18 @@ const FallingText = (function () {
           }
         }
 
-        // 위치 업데이트 적용
-        elem.style.left = `${body.position.x}px`;
-        elem.style.top = `${body.position.y}px`;
-        elem.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`;
+        // 위치 업데이트 적용 - 보다 안정적인 방식으로
+        if (body.position && elem) {
+          elem.style.left = `${body.position.x}px`;
+          elem.style.top = `${body.position.y}px`;
+          elem.style.transform = `translate(-50%, -50%) rotate(${body.angle}rad)`;
+        }
       });
 
-      Matter.Engine.update(this.engine);
       this.animationId = requestAnimationFrame(updateLoop);
     };
+
+    console.log("Starting falling text animation loop");
     updateLoop();
   };
 
@@ -451,19 +526,19 @@ function calculateResponsiveBoxSize() {
     boxWidth = Math.min(300, screenWidth * 0.85);
     boxHeight = boxWidth * 0.9; // 더 정사각형에 가깝게 변경
     boxX = (screenWidth - boxWidth) / 2;
-    boxY = 120;
+    boxY = 60; // 더 위로 올림 - 문구와 겹치지 않게
   } else if (screenWidth < 768) {
     // 태블릿
     boxWidth = Math.min(500, screenWidth * 0.7);
     boxHeight = boxWidth * 0.8; // 더 정사각형에 가깝게 변경
     boxX = (screenWidth - boxWidth) / 2;
-    boxY = 150;
+    boxY = 100; // 태블릿에서도 조금 위로 올림
   } else {
     // 데스크톱 - 이미지와 같이 크기와 위치 조정
     boxWidth = Math.min(520, screenWidth * 0.42); // 병 크기 키움
     boxHeight = boxWidth * 1.2; // 병 높이를 너비의 1.2배로 유지
-    boxX = screenWidth * 0.48 - boxWidth / 2; // 왼쪽으로 더 이동
-    boxY = 140; // 상단 여백 줄임
+    boxX = screenWidth * 0.4 - boxWidth / 2; // 더 왼쪽으로 이동
+    boxY = 180; // 상단 여백 늘림 (더 아래로 이동)
   }
 
   return { boxWidth, boxHeight, boxX, boxY };
@@ -517,6 +592,7 @@ function initFallingText(boxSize) {
       highlightWords: [
         "고요함",
         "자유로움",
+        "섬세함",
         "온기",
         "GentleNight",
         "SantalCream",
@@ -580,10 +656,10 @@ function updateBottlePosition(values) {
     let bottleSize, left, top;
 
     if (screenWidth >= 769) {
-      // 데스크톱 - 첨부한 이미지와 같이 크기 키우고 위치 조정
-      bottleSize = Math.min(demoWidth * 0.9, demoHeight * 0.95, boxWidth); // 크기 키움
-      left = demoWidth * 0.1; // 약간 왼쪽으로 배치하여 차트와 가깝게
-      top = demoHeight * 0.05; // 더 위쪽으로 배치
+      // 데스크톱 - 테두리를 더 왼쪽과 아래로 이동
+      bottleSize = Math.min(demoWidth * 0.9, demoHeight * 0.95, boxWidth); // 크기 유지
+      left = demoWidth * 0.05; // 더 왼쪽으로 배치
+      top = demoHeight * 0.15; // 더 아래로 배치
     } else {
       // 모바일/태블릿에서는 중앙 정렬
       bottleSize = Math.min(demoWidth * 0.8, demoHeight * 0.8, boxWidth);
@@ -655,9 +731,9 @@ function setupFallingTextDemo() {
     let demoHeight = "400px";
 
     if (screenWidth < 480) {
-      demoHeight = "300px"; // 모바일
+      demoHeight = "260px"; // 모바일 - 높이 더 줄여서 문구와 겹치지 않게
     } else if (screenWidth < 768) {
-      demoHeight = "350px"; // 태블릿
+      demoHeight = "320px"; // 태블릿 - 높이 줄임
     } else {
       demoHeight = "500px"; // 데스크톱에서는 더 큰 높이로 설정
     }
@@ -676,9 +752,22 @@ function setupFallingTextDemo() {
 function setupBodyStyles() {
   document.body.style.background = "#f7f5f2";
   document.body.style.margin = "0";
-  document.body.style.overflow = "hidden";
-  document.body.style.height = "100vh";
-  document.body.style.minHeight = "100vh";
+
+  // 화면 크기에 따라 overflow 설정
+  const screenWidth = window.innerWidth;
+
+  if (screenWidth < 768) {
+    // 모바일/태블릿에서는 스크롤 허용
+    document.body.style.overflow = "auto";
+    document.body.style.overflowX = "hidden"; // 가로 스크롤만 차단
+    document.body.style.height = "auto";
+    document.body.style.minHeight = "100vh";
+  } else {
+    // 데스크톱에서는 기존 설정
+    document.body.style.overflow = "hidden";
+    document.body.style.height = "100vh";
+    document.body.style.minHeight = "100vh";
+  }
 }
 
 // 좌측 상단 NONFICTION, 우측 상단 햄버거/SHOP/ABOUT
@@ -1064,15 +1153,18 @@ window.addEventListener("resize", () => {
   window.resizeTimer = setTimeout(() => {
     console.log("Window resized, reinitializing components...");
 
+    // body 스타일 다시 설정 (모바일/데스크톱에 따라)
+    setupBodyStyles();
+
     // FallingText 데모 컨테이너 높이 조정
     const screenWidth = window.innerWidth;
     const demoDiv = document.querySelector("#falling-text-demo");
 
     if (demoDiv) {
       if (screenWidth < 480) {
-        demoDiv.style.height = "300px"; // 모바일
+        demoDiv.style.height = "260px"; // 모바일 - 높이 더 줄임
       } else if (screenWidth < 768) {
-        demoDiv.style.height = "350px"; // 태블릿
+        demoDiv.style.height = "320px"; // 태블릿 - 높이 줄임
       } else {
         demoDiv.style.height = "500px"; // 데스크탑 - 높이를 늘려서 더 크게 보이게
       }
@@ -1142,6 +1234,16 @@ document.addEventListener("DOMContentLoaded", () => {
   setupBodyStyles();
   createUIBar();
   setupFallingTextDemo();
+
+  // NONFICTION 로고 클릭 시 새로고침 기능 추가
+  const logoElem = document.querySelector(".nf-logo");
+  if (logoElem) {
+    logoElem.style.cursor = "pointer";
+    logoElem.addEventListener("click", (e) => {
+      e.preventDefault(); // 링크 기본 동작 방지
+      window.location.reload();
+    });
+  }
 
   // 초기화 함수를 약간 지연 후 호출하여 모든 DOM 요소가 준비되도록 함
   setTimeout(() => {

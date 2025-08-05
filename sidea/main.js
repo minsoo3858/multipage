@@ -4,7 +4,8 @@ let userAnswers = [];
 const logoElem = document.querySelector(".logo");
 if (logoElem) {
   logoElem.style.cursor = "pointer";
-  logoElem.addEventListener("click", () => {
+  logoElem.addEventListener("click", (e) => {
+    e.preventDefault(); // 링크 기본 동작 방지
     window.location.reload();
   });
 }
